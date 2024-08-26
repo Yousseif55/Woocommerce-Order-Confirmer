@@ -1,9 +1,8 @@
 <?php
 /*
  * Plugin Name: Order Confirmer
- * Description: This plugin allows administrators to confirm WooCommerce orders and copy order details to the clipboard. It adds a settings page where a message template can be customized. The plugin also provides secure confirmation links and AJAX support for users to confirm order. Updated Version: Enhance the style, Ajax loading, Adding date and note.
- * Author: CodeCruze
- * Plugin URI: https://codecruze.com/
+ * Description: This plugin allows administrators to confirm WooCommerce orders and copy order details to the clipboard. It adds a settings page where a message template can be customized. The plugin also provides secure confirmation links and AJAX support for users to confirm order.
+ * Author: Yousseif Ahmed
  * Version: 1.2.4
 */
 
@@ -19,7 +18,6 @@ function order_confirmer_add_settings_page()
         'dashicons-clipboard'
     );
 }
-add_action('admin_menu', 'order_confirmer_add_settings_page');
 
 // Render the Order Confirmer settings page
 function order_confirmer_render_settings_page()
@@ -60,7 +58,7 @@ function order_confirmer_render_settings_page()
 function order_confirmer_register_settings()
 {
     register_setting('order_confirmer_settings_group', 'order_confirmer_template');
-    register_setting('order_confirmer_settings_group', 'order_confirmer_instapay_template'); // New template
+    register_setting('order_confirmer_settings_group', 'order_confirmer_bacs_template'); // New template
 
 
     add_settings_section(
@@ -78,14 +76,13 @@ function order_confirmer_register_settings()
         'order_confirmer_settings_section'
     );
     add_settings_field(
-        'order_confirmer_instapay_template', // New template field
-        'Instapay Template',
-        'order_confirmer_instapay_template_callback',
+        'order_confirmer_bacs_template', // New template field
+        'Direct Bank Template',
+        'order_confirmer_bacs_template_callback',
         'order-confirmer-settings',
         'order_confirmer_settings_section'
     );
 }
-add_action('admin_init', 'order_confirmer_register_settings');
 
 // Callback for the settings section description
 function order_confirmer_settings_section_callback()
@@ -142,11 +139,11 @@ function order_confirmer_template_callback()
     echo '<textarea name="order_confirmer_template" rows="10" cols="50" class="large-text">' . esc_textarea($template) . '</textarea>';
 }
 
-// Callback to render the textarea for the Instapay message template
-function order_confirmer_instapay_template_callback()
+// Callback to render the textarea for the bacs message template
+function order_confirmer_bacs_template_callback()
 {
-    $template = get_option('order_confirmer_instapay_template', '');
-    echo '<textarea name="order_confirmer_instapay_template" rows="10" cols="50" class="large-text">' . esc_textarea($template) . '</textarea>';
+    $template = get_option('order_confirmer_bacs_template', '');
+    echo '<textarea name="order_confirmer_bacs_template" rows="10" cols="50" class="large-text">' . esc_textarea($template) . '</textarea>';
 }
 // Add custom columns to the WooCommerce orders page
 function order_confirmer_add_custom_columns($columns)
@@ -184,7 +181,7 @@ function order_confirmer_custom_columns_content($column, $order_id)
             echo '<a href="#" class="billing-phone" title="Copy Number" data-order-phone="' . $translated_phone . '">' . $phone . '</a>';
             break;
         case 'confirm_copy':
-            if ($order->get_payment_method() == 'paymob' || $order->get_payment_method() == 'instapay' && $order->get_date_paid() !== NULL || $order->get_status() == 'completed' || $order->get_status() == 'cancelled' || $order->get_status() == 'refunded') {
+            if ($order->get_payment_method() == 'paymob' || $order->get_payment_method() == 'bacs' && $order->get_date_paid() !== NULL || $order->get_status() == 'completed' || $order->get_status() == 'cancelled' || $order->get_status() == 'refunded') {
                 return;
             } else {
                 $country_code = $order->get_billing_country();
@@ -219,8 +216,6 @@ function order_confirmer_custom_columns_content($column, $order_id)
             }
     }
 }
-add_action('manage_woocommerce_page_wc-orders_custom_column', 'order_confirmer_custom_columns_content', 10, 2);
-
 
 // Handle AJAX request to get the order confirmation template
 function order_confirmer_get_template($order_id)
@@ -228,7 +223,6 @@ function order_confirmer_get_template($order_id)
     global $wpdb;
 
     check_ajax_referer('copy_to_clipboard_nonce', 'nonce');
-
 
     // Retrieve order details
     $order_id = isset($_POST['order_id']) ? intval($_POST['order_id']) : 0;
@@ -240,8 +234,8 @@ function order_confirmer_get_template($order_id)
     $order_date_formatted = date('d/m/Y', strtotime($order_date));
     $order_link = order_confirmer_generate_secure_link($order_id);
     $order_payment = isset($_POST['order_payment']) ? sanitize_text_field($_POST['order_payment']) : '';
-    if ($order_payment == 'instapay') {
-        $template = get_option('order_confirmer_instapay_template', '');
+    if ($order_payment == 'bacs') {
+        $template = get_option('order_confirmer_bacs_template', '');
     } else {
         $template = get_option('order_confirmer_template', '');
     }
@@ -257,7 +251,6 @@ function order_confirmer_get_template($order_id)
     wp_send_json_success($custom_message);
 }
 
-add_action('wp_ajax_get_order_confirmer_template', 'order_confirmer_get_template');
 
 // Auto delete copy request meta if order (completed, refunded, cancelled)
 add_action('woocommerce_order_status_cancelled', function ($order_id) {
@@ -276,24 +269,12 @@ add_action('woocommerce_order_status_refunded', function ($order_id) {
 }, 10, 1);
 
 
-// Enqueue scripts and styles for copying functionality
-function order_confirmer_enqueue_scripts()
-{
-    wp_enqueue_style('order-confirmer-style', plugin_dir_url(__FILE__) . 'stylesheet.css');
-    wp_enqueue_script('order-confirmer-script', plugin_dir_url(__FILE__) . 'script.js', array('jquery'), '1.0', true);
-    wp_localize_script('order-confirmer-script', 'copyToClipboardAjax', array(
-        'ajax_url' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('copy_to_clipboard_nonce'), 'is_user_logged_in' => is_user_logged_in()
-    ));
-}
-add_action('admin_enqueue_scripts', 'order_confirmer_enqueue_scripts');
-add_action('wp_enqueue_scripts', 'order_confirmer_enqueue_scripts');
 
 // Register endpoint for order confirmation
 function order_confirmer_add_endpoint()
 {
     add_rewrite_endpoint('order-confirmation', EP_ROOT | EP_PAGES);
 }
-add_action('init', 'order_confirmer_add_endpoint');
 
 // Flush rewrite rules on plugin activation
 function order_confirmer_rewrite_flush()
@@ -309,7 +290,6 @@ function order_confirmer_query_vars($vars)
     $vars[] = 'order-confirmation';
     return $vars;
 }
-add_filter('query_vars', 'order_confirmer_query_vars');
 
 // Handle endpoint requests
 function order_confirmer_template_redirect()
@@ -320,4 +300,3 @@ function order_confirmer_template_redirect()
         exit;
     }
 }
-add_action('template_redirect', 'order_confirmer_template_redirect');
