@@ -14,12 +14,6 @@ The "Order Confirmer" plugin enhances WooCommerce by enabling order confirmation
 - **AJAX Support:** Confirm orders and copy details to the clipboard via AJAX.
 - **Custom Columns:** Add custom columns to the WooCommerce orders page for quick access to copy details.
 
-## Installation
-
-1. Upload the `order-confirmer` directory to the `/wp-content/plugins/` directory.
-2. Activate the plugin through the 'Plugins' menu in WordPress.
-3. Go to the "Order Confirmer" settings page under the WordPress admin menu to configure the plugin.
-
 ## Usage
 
 - **Settings Page:** Customize the message templates for COD and Direct Bank payment methods in the plugin settings.
