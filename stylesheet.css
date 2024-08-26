@@ -1,0 +1,153 @@
+.loading-spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 9px;
+  height: 9px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.copied-indicator {
+  color: green;
+  font-size: 1.2em;
+  margin-left: 5px;
+}
+
+.order-confirmation-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  z-index: 1000;
+  display: none;
+  text-align: left;
+  max-width: 100%;
+}
+
+.order-confirmation-message.show {
+  display: block;
+}
+
+.order-confirmation-message .message-content {
+  display: flex;
+  align-items: left;
+  justify-content: flex-start;
+  margin-bottom: -10px;
+}
+
+.order-confirmation-message p {
+  font-size:14px;
+  font-weight: 500;
+}
+
+.order-confirmation-message .icon-container {
+  margin-right: 8px;
+}
+
+.order-confirmation-message .fa-check-circle {
+  color: #28a745;
+  font-size: 24px;
+}
+
+.order-confirmation-message .fa-exclamation-triangle {
+  color: #ffc107;
+  font-size: 24px;
+}
+
+.order-confirmation-message .fa-times-circle {
+  color: #dc3545;
+  font-size: 24px;
+}
+
+
+
+.order-confirmation-message .buttons-container {
+  display: flex;
+  justify-content: center;
+}
+
+.order-confirmation-message .buttons-container button {
+
+  border: none;
+  background: #0073aa;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 12px;
+  transition: background-color 0.3s;
+  margin: 0 5px;
+}
+
+.order-confirmation-message .buttons-container .close-btn {
+  background: #dc3232;
+}
+
+.order-confirmation-message .buttons-container button:hover {
+  background: #006799;
+}
+
+.order-confirmation-message .buttons-container .close-btn:hover {
+  background: #b72b2b;
+}
+
+.order-confirmation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none;
+}
+
+.order-confirmation-overlay.show {
+  display: block;
+}
+
+.ajax-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ajax-loading-overlay .spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-top: 4px solid #0073aa;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 4s ease infinite;
+}
+
+@-webkit-keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
